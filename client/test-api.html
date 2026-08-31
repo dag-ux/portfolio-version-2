@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test API</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .project { background: white; padding: 20px; margin: 15px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .project h3 { margin: 0 0 10px 0; color: #333; }
+        .project p { color: #666; margin: 5px 0; }
+        .tech { background: #e0e7ff; color: #4338ca; padding: 4px 12px; border-radius: 20px; margin: 3px; display: inline-block; font-size: 12px; }
+        .links a { margin-right: 15px; color: #2563eb; text-decoration: none; }
+        .links a:hover { text-decoration: underline; }
+        .loading { text-align: center; padding: 50px; color: #666; }
+        .error { background: #fee2e2; color: #991b1b; padding: 20px; border-radius: 8px; }
+        .success { background: #dcfce7; color: #166534; padding: 20px; border-radius: 8px; }
+        h1 { color: #1e293b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📁 Portfolio Projects</h1>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function loadProjects() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="loading">⏳ Loading projects...</div>';
+
+            try {
+                const response = await fetch('http://localhost:5000/api/projects');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const projects = await response.json();
+                console.log('✅ Projects loaded:', projects);
+                
+                if (projects.length === 0) {
+                    resultDiv.innerHTML = '<div class="error">⚠️ No projects found in database</div>';
+                    return;
+                }
+                
+                let html = `<div class="success">✅ Found ${projects.length} projects</div>`;
+                
+                projects.forEach(project => {
+                    html += `
+                        <div class="project">
+                            <h3>${project.title || 'Untitled'}</h3>
+                            <p>${project.description || 'No description'}</p>
+                            <div style="margin: 10px 0;">
+                                <strong>Technologies:</strong><br>
+                                ${project.techStack?.map(tech => 
+                                    `<span class="tech">${tech}</span>`
+                                ).join('') || 'None listed'}
+                            </div>
+                            <div class="links">
+                                ${project.liveUrl ? `<a href="${project.liveUrl}" target="_blank">🔗 Live Demo</a>` : ''}
+                                ${project.githubUrl ? `<a href="${project.githubUrl}" target="_blank">🐙 GitHub</a>` : ''}
+                            </div>
+                            ${project.image ? `<p>📸 Image: <code>${project.image}</code></p>` : ''}
+                            <small style="color: #999;">ID: ${project._id}</small>
+                        </div>
+                    `;
+                });
+                
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Error: ${error.message}
+                        <p style="margin-top: 10px; font-size: 14px;">
+                            Make sure the server is running on http://localhost:5000
+                        </p>
+                    </div>
+                `;
+                console.error('❌ Error:', error);
+            }
+        }
+        
+        // Load projects when page loads
+        loadProjects();
+    </script>
+</body>
+</html>
