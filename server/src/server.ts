@@ -1,3 +1,6 @@
+import dns from "node:dns/promises";
+dns.setServers(["1.1.1.1", "1.0.0.1"]);
+
 import app from './app.js';
 import dotenv from 'dotenv';
 

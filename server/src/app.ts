@@ -17,19 +17,47 @@ dotenv.config();
 const app = express();
 
 // ==================== MIDDLEWARE ====================
+
+// ✅ CORS Configuration - Allow multiple origins including deployment URLs
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'https://portfolio-version-2.vercel.app',  // Your Vercel frontend URL
+  'https://portfolio-frontend.vercel.app',   // Alternative Vercel URL
+  'https://dag-ux.github.io',                // GitHub Pages URL
+  // Add your custom domain if you have one
+];
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log(`❌ Blocked by CORS: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 600 // Cache preflight requests for 10 minutes
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Logging middleware
 app.use((req, res, next) => {
-  console.log(`📨 ${req.method} ${req.url}`);
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    console.log(`📨 ${req.method} ${req.url} - ${res.statusCode} - ${duration}ms`);
+  });
   next();
 });
 
@@ -38,31 +66,59 @@ const uploadsPath = path.join(__dirname, '../uploads');
 app.use('/uploads', express.static(uploadsPath));
 
 // ==================== CONNECT TO MONGODB ====================
+
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/portfolioDB';
 
-mongoose.connect(MONGODB_URI)
+// MongoDB connection options for better stability
+const mongooseOptions = {
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  family: 4, // Use IPv4, skip trying IPv6
+};
+
+mongoose.connect(MONGODB_URI, mongooseOptions)
   .then(() => {
     console.log('✅ MongoDB Connected successfully');
     console.log(`📚 Database: ${mongoose.connection.name}`);
+    console.log(`🔗 Connection string: ${MONGODB_URI.replace(/\/\/[^:]+:[^@]+@/, '//****:****@')}`);
   })
   .catch((err) => {
     console.error('❌ MongoDB Connection Error:', err);
+    console.log('⚠️  Server will continue running but database features may not work');
   });
+
+// Handle MongoDB connection events
+mongoose.connection.on('error', (err) => {
+  console.error('❌ MongoDB connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('⚠️  MongoDB disconnected');
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  await mongoose.connection.close();
+  console.log('✅ MongoDB connection closed through app termination');
+  process.exit(0);
+});
 
 // ==================== ROUTES ====================
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  res.json({
+    status: 'OK',
     message: 'Server is running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    database: dbStatus,
+    uptime: process.uptime()
   });
 });
 
 // ==================== PROJECTS ROUTES ====================
 
-// ✅ IMPORTANT: Define Project model and routes
 let Project: any;
 
 // Function to get Project model
@@ -85,6 +141,14 @@ app.get('/api/projects', async (req, res) => {
   try {
     console.log('📝 GET /api/projects called');
     
+    // Check if MongoDB is connected
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        error: 'Database not connected',
+        message: 'Please try again later'
+      });
+    }
+
     const ProjectModel = await getProjectModel();
     const projects = await ProjectModel.find().sort({ createdAt: -1 });
     
@@ -92,7 +156,7 @@ app.get('/api/projects', async (req, res) => {
     res.json(projects);
   } catch (error) {
     console.error('❌ Error fetching projects:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to fetch projects',
       details: error instanceof Error ? error.message : 'Unknown error'
     });
@@ -102,6 +166,15 @@ app.get('/api/projects', async (req, res) => {
 // ✅ GET single project
 app.get('/api/projects/:id', async (req, res) => {
   try {
+    console.log(`📝 GET /api/projects/${req.params.id}`);
+    
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        error: 'Database not connected',
+        message: 'Please try again later'
+      });
+    }
+
     const ProjectModel = await getProjectModel();
     const project = await ProjectModel.findById(req.params.id);
     
@@ -111,7 +184,7 @@ app.get('/api/projects/:id', async (req, res) => {
     res.json(project);
   } catch (error) {
     console.error('❌ Error fetching project:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to fetch project',
       details: error instanceof Error ? error.message : 'Unknown error'
     });
@@ -123,6 +196,13 @@ app.post('/api/projects', async (req, res) => {
   try {
     console.log('📝 POST /api/projects');
     
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        error: 'Database not connected',
+        message: 'Please try again later'
+      });
+    }
+
     const ProjectModel = await getProjectModel();
     const projectData = { ...req.body };
     
@@ -150,9 +230,9 @@ app.post('/api/projects', async (req, res) => {
     res.status(201).json(project);
   } catch (error: any) {
     console.error('❌ Error creating project:', error);
-    res.status(400).json({ 
+    res.status(400).json({
       error: 'Failed to create project',
-      details: error.message 
+      details: error.message
     });
   }
 });
@@ -160,6 +240,15 @@ app.post('/api/projects', async (req, res) => {
 // ✅ PUT update project
 app.put('/api/projects/:id', async (req, res) => {
   try {
+    console.log(`📝 PUT /api/projects/${req.params.id}`);
+    
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        error: 'Database not connected',
+        message: 'Please try again later'
+      });
+    }
+
     const ProjectModel = await getProjectModel();
     const projectData = { ...req.body };
     
@@ -186,9 +275,9 @@ app.put('/api/projects/:id', async (req, res) => {
     res.json(project);
   } catch (error: any) {
     console.error('❌ Error updating project:', error);
-    res.status(400).json({ 
+    res.status(400).json({
       error: 'Failed to update project',
-      details: error.message 
+      details: error.message
     });
   }
 });
@@ -196,6 +285,15 @@ app.put('/api/projects/:id', async (req, res) => {
 // ✅ DELETE project
 app.delete('/api/projects/:id', async (req, res) => {
   try {
+    console.log(`📝 DELETE /api/projects/${req.params.id}`);
+    
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        error: 'Database not connected',
+        message: 'Please try again later'
+      });
+    }
+
     const ProjectModel = await getProjectModel();
     const project = await ProjectModel.findByIdAndDelete(req.params.id);
     
@@ -207,7 +305,7 @@ app.delete('/api/projects/:id', async (req, res) => {
     res.json({ message: 'Project deleted successfully' });
   } catch (error) {
     console.error('❌ Error deleting project:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to delete project',
       details: error instanceof Error ? error.message : 'Unknown error'
     });
@@ -222,7 +320,7 @@ app.use('/api/contact', contactRoutes);
 // 404 handler
 app.use((req, res) => {
   console.log(`❌ 404: ${req.method} ${req.url}`);
-  res.status(404).json({ 
+  res.status(404).json({
     error: 'Route not found',
     path: req.originalUrl,
     method: req.method
@@ -232,12 +330,18 @@ app.use((req, res) => {
 // Global error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('❌ Global error:', err);
-  res.status(500).json({ 
+  
+  // Don't expose internal errors in production
+  const isProduction = process.env.NODE_ENV === 'production';
+  res.status(err.status || 500).json({
     error: 'Internal server error',
-    message: err.message 
+    message: isProduction ? 'Something went wrong. Please try again later.' : err.message,
+    ...(isProduction ? {} : { stack: err.stack })
   });
 });
 
 console.log('✅ All routes registered successfully!');
+console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
+console.log(`🌐 CORS allowed origins: ${allowedOrigins.join(', ')}`);
 
 export default app;

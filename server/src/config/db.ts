@@ -1,3 +1,6 @@
+import dns from "node:dns/promises";
+dns.setServers(["1.1.1.1", "1.0.0.1", "8.8.8.8"]);
+
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
@@ -5,25 +8,15 @@ dotenv.config();
 
 export const connectDB = async () => {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/portfolioDB';
-    console.log(`📡 Connecting to MongoDB at: ${mongoURI}`);
+    const mongoURI = process.env.MONGODB_URI;
+    console.log(`📡 Connecting to MongoDB...`);
     
-    const conn = await mongoose.connect(mongoURI);
+    const conn = await mongoose.connect(mongoURI, {
+      serverSelectionTimeoutMS: 30000,
+    });
+    
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
     console.log(`📚 Database: ${conn.connection.name}`);
-    
-    const collections = await conn.connection.db.listCollections().toArray();
-    console.log('📚 Available collections:', collections.map(c => c.name));
-    
-    if (collections.some(c => c.name === 'projects')) {
-      try {
-        const Project = (await import('../models/Project')).default;
-        const count = await Project.countDocuments();
-        console.log(`📊 Projects in database: ${count}`);
-      } catch (error) {
-        console.log('⚠️ Could not count projects:', error);
-      }
-    }
     
     return conn;
   } catch (error) {

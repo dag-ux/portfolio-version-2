@@ -1,7 +1,8 @@
 ﻿# Dependencies
 node_modules/
-.pnp/
+.pnp
 .pnp.js
+.pnp.*
 
 # Build outputs
 dist/
@@ -9,12 +10,13 @@ build/
 out/
 .next/
 .vercel/
+*.tsbuildinfo
 
 # Environment variables
 .env
 .env.local
-.env.*.local
-*.env
+.env.*
+!.env.example
 
 # Logs
 logs/
@@ -23,6 +25,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+.eslintcache
 
 # Runtime data
 pids/
@@ -30,9 +33,16 @@ pids/
 *.seed
 *.pid.lock
 
-# Coverage
+# Coverage & testing
 coverage/
 .nyc_output/
+*.lcov
+junit.xml
+
+# Cache
+.cache/
+.parcel-cache/
+.vite/
 
 # OS files
 .DS_Store
@@ -45,7 +55,6 @@ desktop.ini
 *.swp
 *.swo
 *~
-.vscode/
 
 # Temporary files
 tmp/
@@ -54,26 +63,8 @@ temp/
 # Uploads
 uploads/
 
-# MongoDB data
-data/
-mongodb-data/
-
-# TypeScript
-*.tsbuildinfo
-
-# Vite
-.vite/
-
 # Docker
 .docker/
 
-# Environment example files
-!.env.example
-
-# Specific directories
-server/node_modules/
-client/node_modules/
-server/dist/
-client/dist/
-server/build/
-client/build/
+# Misc
+*.tgz
