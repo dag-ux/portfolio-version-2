@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaGithub, FaExternalLinkAlt, FaSpinner, FaExclamationTriangle } from 'react-icons/fa';
-import { getProjects } from '../../services/api';
+import { getProjects, API_BASE_URL } from '../../services/api';
 
 interface Project {
   _id: string;
@@ -23,13 +23,13 @@ export default function Projects() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        console.log('🔍 Fetching projects...');
+        console.log('Fetching projects...');
         const data = await getProjects();
-        console.log('✅ Projects received:', data);
+        console.log('Projects received:', data);
         setProjects(data);
         setLoading(false);
       } catch (err: any) {
-        console.error('❌ Failed to fetch projects:', err);
+        console.error('Failed to fetch projects:', err);
         setError(err.message || 'Failed to load projects');
         setLoading(false);
       }
@@ -37,13 +37,12 @@ export default function Projects() {
     fetchProjects();
   }, []);
 
-  // ✅ Get image URL
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return '';
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
     }
-    return `http://localhost:5000${imagePath}`;
+    return `${API_BASE_URL}${imagePath}`;
   };
 
   if (loading) {
@@ -104,7 +103,7 @@ export default function Projects() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.map((project, idx) => {
               const imageUrl = getImageUrl(project.image);
-              
+
               return (
                 <motion.div
                   key={project._id}
@@ -120,12 +119,11 @@ export default function Projects() {
                       alt={project.title}
                       className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
                       onError={(e) => {
-                        console.log(`⚠️ Image failed to load: ${imageUrl}`);
+                        console.log(`Image failed to load: ${imageUrl}`);
                         const target = e.target as HTMLImageElement;
                         target.style.display = 'none';
                       }}
                     />
-                    
                   </div>
                   <div className="p-6">
                     <h3 className="text-xl font-bold text-white mb-2">{project.title}</h3>

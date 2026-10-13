@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaGithub, FaExternalLinkAlt, FaSpinner } from 'react-icons/fa';
-import { getProjects } from '../services/api';
+import { getProjects, API_BASE_URL } from '../services/api';
 
 interface Project {
   _id: string;
@@ -82,11 +82,16 @@ export default function ProjectsPage() {
               >
                 <div className="overflow-hidden">
                   <img
-                    src={project.image.startsWith('http') ? project.image : `http://localhost:5000${project.image}`}
+                    src={
+                      project.image.startsWith('http')
+                        ? project.image
+                        : `${API_BASE_URL}${project.image}`
+                    }
                     alt={project.title}
                     className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x400/1a1a1a/ff0000?text=Project';
+                      (e.target as HTMLImageElement).src =
+                        'https://via.placeholder.com/600x400/1a1a1a/ff0000?text=Project';
                     }}
                   />
                 </div>
