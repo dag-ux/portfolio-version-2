@@ -16,10 +16,10 @@ export default function About() {
             <div className="relative">
               <div className="absolute -inset-1 bg-gradient-to-r from-[#ff0000] to-[#ff4444] rounded-2xl blur opacity-30" />
               <img
-                src="/src/assets/my photo.jpg"
-                alt="Dagimawit Kebede"
-                className="relative w-64 h-64 md:w-80 md:h-80 rounded-2xl object-cover border-2 border-white/10"
-              />
+  src="/profile.jpg"
+  alt="Dagimawit Kebede"
+  className="relative w-64 h-64 md:w-80 md:h-80 rounded-2xl object-cover border-2 border-white/10"
+/>
               {/* Decorative dots */}
               <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-[#ff0000]/20 rounded-full blur-xl" />
               <div className="absolute -top-4 -left-4 w-12 h-12 border-2 border-[#ff0000]/30 rounded-full" />
