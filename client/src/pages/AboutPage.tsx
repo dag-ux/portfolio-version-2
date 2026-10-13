@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { FaUser, FaBriefcase, FaGraduationCap, FaCode, FaMapMarkerAlt, FaEnvelope, FaGithub, FaLinkedin } from 'react-icons/fa';
+import { FaUser,  FaGraduationCap, FaMapMarkerAlt, FaEnvelope, FaGithub, FaLinkedin } from 'react-icons/fa';
 import myPhoto from '../assets/my photo.jpg';
 
 const Icon = ({ icon: IconComponent, className, size }: any) => (
