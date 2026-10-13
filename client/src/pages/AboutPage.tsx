@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
-import { FaUser,  FaGraduationCap, FaMapMarkerAlt, FaEnvelope, FaGithub, FaLinkedin } from 'react-icons/fa';
-import myPhoto from '../assets/my photo.jpg';
+import { FaUser, FaGraduationCap, FaMapMarkerAlt, FaEnvelope, FaGithub, FaLinkedin } from 'react-icons/fa';
 
 const Icon = ({ icon: IconComponent, className, size }: any) => (
   <IconComponent className={className} size={size} />
@@ -11,8 +10,8 @@ export default function AboutPage() {
     <section className="min-h-screen py-20 px-4 sm:px-6 bg-black overflow-hidden">
       <div className="container mx-auto max-w-5xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          
-          {/* ===== LEFT: IMAGE with Attractive Style ===== */}
+
+          {/* LEFT: IMAGE */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -20,24 +19,25 @@ export default function AboutPage() {
             className="flex justify-center order-2 lg:order-1"
           >
             <div className="relative">
-              {/* Main Image with Pulse Glow */}
               <motion.div
-                animate={{ 
-                  boxShadow: ['0 0 20px rgba(255,0,0,0.1)', '0 0 40px rgba(255,0,0,0.2)', '0 0 20px rgba(255,0,0,0.1)'] 
+                animate={{
+                  boxShadow: [
+                    '0 0 20px rgba(255,0,0,0.1)',
+                    '0 0 40px rgba(255,0,0,0.2)',
+                    '0 0 20px rgba(255,0,0,0.1)',
+                  ],
                 }}
                 transition={{ duration: 3, repeat: Infinity }}
                 className="relative w-64 h-64 md:w-80 md:h-80 rounded-2xl overflow-hidden border-2 border-white/10 shadow-2xl"
               >
                 <img
-                  src={myPhoto}
+                  src="/profile.jpg"
                   alt="Dagimawit Kebede"
                   className="w-full h-full object-cover"
                 />
-                {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               </motion.div>
 
-              {/* Decorative Rings */}
               <motion.div
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -51,7 +51,6 @@ export default function AboutPage() {
                 className="absolute -bottom-4 -right-4 w-20 h-20 border-2 border-[#ff0000]/30 rounded-full"
               />
 
-              {/* Corner Accents */}
               <motion.div
                 initial={{ scale: 0, rotate: -45 }}
                 animate={{ scale: 1, rotate: 0 }}
@@ -65,7 +64,6 @@ export default function AboutPage() {
                 className="absolute -bottom-2 -right-2 w-8 h-8 border-b-2 border-r-2 border-[#ff0000]/60 rounded-br-lg"
               />
 
-              {/* Status Badge */}
               <motion.div
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -76,7 +74,6 @@ export default function AboutPage() {
                 Available
               </motion.div>
 
-              {/* Experience Badge */}
               <motion.div
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -89,14 +86,13 @@ export default function AboutPage() {
             </div>
           </motion.div>
 
-          {/* ===== RIGHT: CONTENT ===== */}
+          {/* RIGHT: CONTENT */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
             className="order-1 lg:order-2 space-y-5"
           >
-            {/* Header */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -115,7 +111,6 @@ export default function AboutPage() {
               />
             </motion.div>
 
-            {/* Description */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -137,7 +132,6 @@ export default function AboutPage() {
               gaining hands-on experience in system design, development, and deployment.
             </motion.p>
 
-            {/* Info Grid */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -162,7 +156,6 @@ export default function AboutPage() {
               </div>
             </motion.div>
 
-            {/* Stats */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -187,7 +180,6 @@ export default function AboutPage() {
               ))}
             </motion.div>
 
-            {/* Tech Stack */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -207,7 +199,6 @@ export default function AboutPage() {
               ))}
             </motion.div>
 
-            {/* Social Links */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
