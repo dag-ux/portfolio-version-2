@@ -13,8 +13,7 @@
     "rootDir": "./src",
     "strict": false,
     "verbatimModuleSyntax": false,
-    "noEmit": false,
-    "ignoreDeprecations": "6.0"
+    "noEmit": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
