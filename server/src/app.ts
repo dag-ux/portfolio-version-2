@@ -7,6 +7,8 @@ import path from 'path';
 
 import contactRoutes from './routes/contact.routes.js';
 import Project from './models/Project.js';
+import authRoutes from './routes/auth.routes.js';
+import messageRoutes from './routes/message.routes.js';
 
 dotenv.config();
 
@@ -21,6 +23,7 @@ const allowedOrigins = [
   'https://portfolio-frontend.vercel.app',
   'https://dag-ux.github.io',
 ];
+
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
@@ -38,6 +41,7 @@ app.use(cors({
   maxAge: 600,
 }));
 
+// Body parsers MUST come before routes
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -259,6 +263,9 @@ app.delete('/api/projects/:id', async (req, res) => {
   }
 });
 
+// Route registrations AFTER body parsers
+app.use('/api/auth', authRoutes);
+app.use('/api/messages', messageRoutes);
 app.use('/api/contact', contactRoutes);
 
 app.use((req, res) => {
