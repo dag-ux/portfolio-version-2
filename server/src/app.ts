@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import path from 'path';
 
 import contactRoutes from './routes/contact.routes.js';
+import Project from './models/Project.js';
 
 dotenv.config();
 
@@ -96,20 +97,6 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-let Project: any;
-
-const getProjectModel = async () => {
-  if (!Project) {
-    try {
-      Project = mongoose.model('Project');
-    } catch (e) {
-      const module = await import('./models/Project.js');
-      Project = module.default;
-    }
-  }
-  return Project;
-};
-
 app.get('/api/projects', async (req, res) => {
   try {
     console.log('GET /api/projects called');
@@ -121,8 +108,7 @@ app.get('/api/projects', async (req, res) => {
       });
     }
 
-    const ProjectModel = await getProjectModel();
-    const projects = await ProjectModel.find().sort({ createdAt: -1 });
+    const projects = await Project.find().sort({ createdAt: -1 });
 
     console.log(`Found ${projects.length} projects`);
     res.json(projects);
@@ -146,8 +132,7 @@ app.get('/api/projects/:id', async (req, res) => {
       });
     }
 
-    const ProjectModel = await getProjectModel();
-    const project = await ProjectModel.findById(req.params.id);
+    const project = await Project.findById(req.params.id);
 
     if (!project) {
       return res.status(404).json({ error: 'Project not found' });
@@ -173,7 +158,6 @@ app.post('/api/projects', async (req, res) => {
       });
     }
 
-    const ProjectModel = await getProjectModel();
     const projectData: any = { ...req.body };
 
     if (typeof projectData.techStack === 'string') {
@@ -191,7 +175,7 @@ app.post('/api/projects', async (req, res) => {
       return res.status(400).json({ error: 'Description is required' });
     }
 
-    const project = new ProjectModel(projectData);
+    const project = new Project(projectData);
     await project.save();
 
     console.log(`Project created: ${project.title}`);
@@ -216,7 +200,6 @@ app.put('/api/projects/:id', async (req, res) => {
       });
     }
 
-    const ProjectModel = await getProjectModel();
     const projectData: any = { ...req.body };
 
     if (typeof projectData.techStack === 'string') {
@@ -227,7 +210,7 @@ app.put('/api/projects/:id', async (req, res) => {
       }
     }
 
-    const project = await ProjectModel.findByIdAndUpdate(
+    const project = await Project.findByIdAndUpdate(
       req.params.id,
       projectData,
       { new: true, runValidators: true }
@@ -259,8 +242,7 @@ app.delete('/api/projects/:id', async (req, res) => {
       });
     }
 
-    const ProjectModel = await getProjectModel();
-    const project = await ProjectModel.findByIdAndDelete(req.params.id);
+    const project = await Project.findByIdAndDelete(req.params.id);
 
     if (!project) {
       return res.status(404).json({ error: 'Project not found' });
