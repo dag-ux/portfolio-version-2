@@ -3,8 +3,6 @@ import axios from 'axios';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 export const API_BASE_URL = API_URL.replace(/\/api$/, '');
 
-console.log('API URL:', API_URL);
-
 export const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -16,9 +14,7 @@ export const api = axios.create({
 // ==================== PROJECTS ====================
 export const getProjects = async () => {
   try {
-    console.log('Fetching projects from:', `${API_URL}/projects`);
     const response = await api.get('/projects');
-    console.log('Projects fetched:', response.data);
     return response.data;
   } catch (error: any) {
     console.error('Failed to fetch projects:', error.message);
@@ -39,36 +35,6 @@ export const getProject = async (id: string) => {
   }
 };
 
-export const createProject = async (data: any) => {
-  try {
-    const response = await api.post('/projects', data);
-    return response.data;
-  } catch (error: any) {
-    console.error('Failed to create project:', error.message);
-    throw error;
-  }
-};
-
-export const updateProject = async (id: string, data: any) => {
-  try {
-    const response = await api.put(`/projects/${id}`, data);
-    return response.data;
-  } catch (error: any) {
-    console.error(`Failed to update project ${id}:`, error.message);
-    throw error;
-  }
-};
-
-export const deleteProject = async (id: string) => {
-  try {
-    const response = await api.delete(`/projects/${id}`);
-    return response.data;
-  } catch (error: any) {
-    console.error(`Failed to delete project ${id}:`, error.message);
-    throw error;
-  }
-};
-
 // ==================== SKILLS ====================
 export const getSkills = async () => {
   try {
@@ -80,12 +46,13 @@ export const getSkills = async () => {
   }
 };
 
-export const createSkill = async (data: any) => {
+// ==================== EXPERIENCES ====================
+export const getExperiences = async () => {
   try {
-    const response = await api.post('/skills', data);
+    const response = await api.get('/experiences');
     return response.data;
   } catch (error: any) {
-    console.error('Failed to create skill:', error.message);
+    console.error('Failed to fetch experiences:', error.message);
     throw error;
   }
 };
@@ -102,27 +69,6 @@ export const sendMessage = async (data: {
     return response.data;
   } catch (error: any) {
     console.error('Failed to send message:', error.message);
-    throw error;
-  }
-};
-
-// ==================== EXPERIENCE ====================
-export const getExperiences = async () => {
-  try {
-    const response = await api.get('/experiences');
-    return response.data;
-  } catch (error: any) {
-    console.error('Failed to fetch experiences:', error.message);
-    throw error;
-  }
-};
-
-export const createExperience = async (data: any) => {
-  try {
-    const response = await api.post('/experiences', data);
-    return response.data;
-  } catch (error: any) {
-    console.error('Failed to create experience:', error.message);
     throw error;
   }
 };

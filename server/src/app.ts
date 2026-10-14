@@ -10,6 +10,8 @@ import Project from './models/Project.js';
 import authRoutes from './routes/auth.routes.js';
 import messageRoutes from './routes/message.routes.js';
 import uploadRoutes from './routes/upload.routes.js';
+import skillRoutes from './routes/skill.routes.js';
+import experienceRoutes from './routes/experience.routes.js';
 
 dotenv.config();
 
@@ -268,6 +270,8 @@ app.delete('/api/projects/:id', async (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/skills', skillRoutes);
+app.use('/api/experiences', experienceRoutes);
 app.use('/api/contact', contactRoutes);
 
 app.use((req, res) => {
