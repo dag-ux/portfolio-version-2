@@ -9,6 +9,7 @@ import contactRoutes from './routes/contact.routes.js';
 import Project from './models/Project.js';
 import authRoutes from './routes/auth.routes.js';
 import messageRoutes from './routes/message.routes.js';
+import uploadRoutes from './routes/upload.routes.js';
 
 dotenv.config();
 
@@ -266,6 +267,7 @@ app.delete('/api/projects/:id', async (req, res) => {
 // Route registrations AFTER body parsers
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/upload', uploadRoutes);
 app.use('/api/contact', contactRoutes);
 
 app.use((req, res) => {
