@@ -6,19 +6,21 @@ import {
 
 const RESUME_PATH = '/Dagimawit_Kebede_Modern_CV.pdf';
 
-const useTypingEffect = (text: string, speed = 80) => {
+const useTypingEffect = (text: string, speed = 40) => {
   const [displayedText, setDisplayedText] = useState('');
-  const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    if (index < text.length) {
-      const timer = setTimeout(() => {
-        setDisplayedText((prev) => prev + text[index]);
-        setIndex(index + 1);
-      }, speed);
-      return () => clearTimeout(timer);
-    }
-  }, [index, text, speed]);
+    let i = 0;
+    const timer = setInterval(() => {
+      if (i < text.length) {
+        setDisplayedText(text.slice(0, i + 1));
+        i++;
+      } else {
+        clearInterval(timer);
+      }
+    }, speed);
+    return () => clearInterval(timer);
+  }, [text, speed]);
 
   return displayedText;
 };
@@ -33,17 +35,21 @@ const container = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.12, delayChildren: 0.2 },
+    transition: { staggerChildren: 0.06, delayChildren: 0 },
   },
 };
 
 const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' as const } },
+  hidden: { opacity: 0, y: 12 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.35, ease: 'easeOut' as const },
+  },
 };
 
 export default function Hero() {
-  const typedText = useTypingEffect('Full-Stack Developer', 80);
+  const typedText = useTypingEffect('Full-Stack Developer', 40);
 
   return (
     <section
@@ -56,6 +62,7 @@ export default function Hero() {
         style={{
           background: 'radial-gradient(circle, rgba(255,0,0,0.15) 0%, transparent 70%)',
           filter: 'blur(60px)',
+          willChange: 'transform',
         }}
         animate={{ x: [0, 80, -40, 0], y: [0, -60, 40, 0], scale: [1, 1.1, 0.95, 1] }}
         transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
@@ -65,6 +72,7 @@ export default function Hero() {
         style={{
           background: 'radial-gradient(circle, rgba(255,80,80,0.12) 0%, transparent 70%)',
           filter: 'blur(80px)',
+          willChange: 'transform',
         }}
         animate={{ x: [0, -70, 50, 0], y: [0, 60, -40, 0], scale: [1, 0.9, 1.15, 1] }}
         transition={{ duration: 25, delay: 2, repeat: Infinity, ease: 'easeInOut' }}
@@ -89,17 +97,7 @@ export default function Hero() {
         animate="show"
         className="relative max-w-5xl mx-auto text-center z-10 py-20"
       >
-        {/* Status badge */}
-        <motion.div variants={item} className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/10 bg-white/[0.03] backdrop-blur-sm mb-6 sm:mb-8">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff0000] opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#ff0000]" />
-          </span>
-          <span className="text-xs font-medium text-gray-300 tracking-wide">
-            Open to opportunities
-          </span>
-        </motion.div>
-
+        
         {/* Heading */}
         <motion.h1
           variants={item}
@@ -110,9 +108,10 @@ export default function Hero() {
             <span className="text-[#ff0000]">Dagimawit Kebede</span>
             <motion.span
               className="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-[#ff0000] via-[#ff0000] to-transparent rounded-full"
-              initial={{ scaleX: 0, originX: 0 }}
+              initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
-              transition={{ duration: 1, delay: 1.2, ease: 'easeOut' }}
+              style={{ transformOrigin: 'left' }}
+              transition={{ duration: 0.5, delay: 0.4, ease: 'easeOut' }}
             />
           </span>
         </motion.h1>
@@ -140,7 +139,10 @@ export default function Hero() {
         </motion.p>
 
         {/* Social icons */}
-        <motion.div variants={item} className="flex justify-center gap-3 sm:gap-4 mb-8 sm:mb-10">
+        <motion.div
+          variants={item}
+          className="flex justify-center gap-3 sm:gap-4 mb-8 sm:mb-10"
+        >
           {socials.map(({ icon: Icon, href, label }) => (
             <motion.a
               key={label}
@@ -158,7 +160,10 @@ export default function Hero() {
         </motion.div>
 
         {/* Buttons */}
-        <motion.div variants={item} className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 px-4">
+        <motion.div
+          variants={item}
+          className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 px-4"
+        >
           <motion.a
             href="#projects"
             whileHover={{ scale: 1.03, y: -2 }}
@@ -187,9 +192,9 @@ export default function Hero() {
         href="#about"
         aria-label="Scroll down"
         className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 text-gray-500 hover:text-[#ff0000] transition-colors"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 2, duration: 0.6 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8, duration: 0.4 }}
       >
         <motion.div
           animate={{ y: [0, 8, 0] }}
