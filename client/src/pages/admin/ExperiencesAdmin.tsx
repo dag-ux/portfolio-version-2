@@ -7,11 +7,9 @@ import type { ToastType } from '../../components/admin/Toast';
 import ExperienceFormModal from '../../components/admin/ExperienceFormModal';
 import type { ExperienceFormData } from '../../components/admin/ExperienceFormModal';
 import {
-  FaPlus, FaEdit, FaTrash, FaSpinner, FaBriefcase,
+  FaPlus, FaEdit, FaTrash, FaBriefcase,
   FaMapMarkerAlt, FaCalendarAlt, FaSearch, FaBuilding,
-  FaCheckCircle, FaTimesCircle,
 } from 'react-icons/fa';
-
 interface Experience extends ExperienceFormData {
   _id: string;
   createdAt?: string;

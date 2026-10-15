@@ -7,7 +7,7 @@ import type { ToastType } from '../../components/admin/Toast';
 import SkillFormModal from '../../components/admin/SkillFormModal';
 import type { SkillFormData } from '../../components/admin/SkillFormModal';
 import {
-  FaPlus, FaEdit, FaTrash, FaSpinner, FaSearch, FaCode,
+  FaPlus, FaEdit, FaTrash, FaSearch, FaCode,
   FaLaptopCode, FaServer, FaDatabase, FaCloud, FaMobileAlt, FaCubes,
 } from 'react-icons/fa';
 
