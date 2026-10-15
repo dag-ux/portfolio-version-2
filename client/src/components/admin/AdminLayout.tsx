@@ -6,7 +6,7 @@ import AdminBackground from '../ui/AdminBackground';
 import {
   FaTachometerAlt, FaFolder, FaEnvelope, FaTools, FaBriefcase,
   FaSignOutAlt, FaMoon, FaSun, FaBars, FaTimes, FaHome,
-  FaChevronRight, FaExternalLinkAlt, FaBell, FaUser, FaChevronDown,
+  FaChevronRight, FaExternalLinkAlt, FaBell, FaChevronDown,
   FaShieldAlt,
 } from 'react-icons/fa';
 
