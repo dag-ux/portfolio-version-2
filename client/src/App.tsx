@@ -45,7 +45,7 @@ function App() {
         <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
 
         {/* ADMIN */}
-        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/login" element={<PublicLayout><AdminLogin /></PublicLayout>} />
         <Route path="/admin" element={<ProtectedRoute />}>
           <Route element={<AdminLayout />}>
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
