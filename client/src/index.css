@@ -1,3 +1,71 @@
 @import "tailwindcss";
 
+/* Dark mode variant (for `.dark` class toggling) */
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Custom theme — Tailwind 4 CSS-based config */
+@theme {
+  /* Extra breakpoint for small phones */
+  --breakpoint-xs: 400px;
+
+  /* Brand colors */
+  --color-primary: #ff0000;
+  --color-primary-dark: #cc0000;
+  --color-bg: #000000;
+
+  /* Custom fonts (optional — remove if not using) */
+  --font-display: 'Inter', system-ui, sans-serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  /* Custom animations */
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-glow: glow 2s ease-in-out infinite;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.3); }
+    50% { box-shadow: 0 0 40px rgba(255, 0, 0, 0.6); }
+  }
+}
+
+/* Base styles */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #000;
+  color: #fff;
+}
+
+/* Custom scrollbar (subtle, matches theme) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ff0000;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #cc0000;
+}
+
+/* Text selection */
+::selection {
+  background: #ff0000;
+  color: #fff;
+}

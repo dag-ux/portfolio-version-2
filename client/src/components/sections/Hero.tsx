@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
-import { FaGithub, FaLinkedin, FaEnvelope, FaDownload, FaArrowRight } from 'react-icons/fa';
+import { motion } from 'framer-motion';
+import {
+  FaGithub, FaLinkedin, FaEnvelope, FaDownload, FaArrowRight, FaChevronDown,
+} from 'react-icons/fa';
 
-const useTypingEffect = (text: string, speed: number = 80) => {
+const RESUME_PATH = '/Dagimawit_Kebede_Modern_CV.pdf';
+
+const useTypingEffect = (text: string, speed = 80) => {
   const [displayedText, setDisplayedText] = useState('');
   const [index, setIndex] = useState(0);
 
@@ -18,30 +23,74 @@ const useTypingEffect = (text: string, speed: number = 80) => {
   return displayedText;
 };
 
+const socials = [
+  { icon: FaGithub, href: 'https://github.com/dag-ux', label: 'GitHub' },
+  { icon: FaLinkedin, href: 'https://www.linkedin.com/in/dagimawit-kebede', label: 'LinkedIn' },
+  { icon: FaEnvelope, href: 'mailto:kebededagimawit@gmail.com', label: 'Email' },
+];
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.12, delayChildren: 0.2 },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' as const } },
+};
+
 export default function Hero() {
   const typedText = useTypingEffect('Full-Stack Developer', 80);
 
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 bg-black overflow-hidden"
+      className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-black overflow-hidden"
     >
-      {/* Ambient background glow */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="w-[36rem] h-[36rem] bg-[#ff0000]/10 rounded-full blur-[120px]" />
-      </div>
+      {/* Animated background orbs */}
+      <motion.div
+        className="pointer-events-none absolute top-1/4 left-1/4 w-[24rem] sm:w-[36rem] h-[24rem] sm:h-[36rem] rounded-full"
+        style={{
+          background: 'radial-gradient(circle, rgba(255,0,0,0.15) 0%, transparent 70%)',
+          filter: 'blur(60px)',
+        }}
+        animate={{ x: [0, 80, -40, 0], y: [0, -60, 40, 0], scale: [1, 1.1, 0.95, 1] }}
+        transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div
+        className="pointer-events-none absolute bottom-1/4 right-1/4 w-[20rem] sm:w-[30rem] h-[20rem] sm:h-[30rem] rounded-full"
+        style={{
+          background: 'radial-gradient(circle, rgba(255,80,80,0.12) 0%, transparent 70%)',
+          filter: 'blur(80px)',
+        }}
+        animate={{ x: [0, -70, 50, 0], y: [0, 60, -40, 0], scale: [1, 0.9, 1.15, 1] }}
+        transition={{ duration: 25, delay: 2, repeat: Infinity, ease: 'easeInOut' }}
+      />
+
+      {/* Grid pattern */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.03]"
+        className="pointer-events-none absolute inset-0"
         style={{
           backgroundImage:
-            'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)',
-          backgroundSize: '48px 48px',
+            'linear-gradient(rgba(255,0,0,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,0,0,0.06) 1px, transparent 1px)',
+          backgroundSize: '60px 60px',
+          maskImage: 'radial-gradient(ellipse at center, black 40%, transparent 80%)',
+          WebkitMaskImage: 'radial-gradient(ellipse at center, black 40%, transparent 80%)',
         }}
       />
 
-      <div className="relative max-w-4xl mx-auto text-center font-sans">
-        {/* Eyebrow / status badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 mb-6">
+      {/* Content */}
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="relative max-w-5xl mx-auto text-center z-10 py-20"
+      >
+        {/* Status badge */}
+        <motion.div variants={item} className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/10 bg-white/[0.03] backdrop-blur-sm mb-6 sm:mb-8">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff0000] opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[#ff0000]" />
@@ -49,77 +98,108 @@ export default function Hero() {
           <span className="text-xs font-medium text-gray-300 tracking-wide">
             Open to opportunities
           </span>
-        </div>
+        </motion.div>
 
         {/* Heading */}
-        <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-4 tracking-tight">
+        <motion.h1
+          variants={item}
+          className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] mb-4 sm:mb-6 tracking-tight"
+        >
           Hi, I'm{' '}
-          <span className="text-[#ff0000]">Dagimawit Kebede</span>
-        </h1>
+          <span className="relative inline-block">
+            <span className="text-[#ff0000]">Dagimawit Kebede</span>
+            <motion.span
+              className="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-[#ff0000] via-[#ff0000] to-transparent rounded-full"
+              initial={{ scaleX: 0, originX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 1, delay: 1.2, ease: 'easeOut' }}
+            />
+          </span>
+        </motion.h1>
 
         {/* Typing effect */}
-        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 font-medium mb-4 h-9">
+        <motion.p
+          variants={item}
+          className="text-lg sm:text-2xl md:text-3xl text-gray-300 font-medium mb-4 h-8 sm:h-10 flex items-center justify-center"
+        >
           {typedText}
-          <span className="animate-pulse text-[#ff0000]">|</span>
-        </p>
+          <span className="ml-0.5 animate-pulse text-[#ff0000]">|</span>
+        </motion.p>
 
         {/* Description */}
-        <p className="text-gray-400 max-w-2xl mx-auto mb-8 text-sm sm:text-base leading-relaxed">
-          Software Engineering student at Haramaya University
-          <br />
-          <span className="text-sm text-gray-500">
+        <motion.p
+          variants={item}
+          className="text-gray-400 max-w-2xl mx-auto mb-8 sm:mb-10 text-sm sm:text-base leading-relaxed px-4"
+        >
+          Software Engineering student at{' '}
+          <span className="text-white font-medium">Haramaya University</span>
+          <br className="hidden sm:block" />
+          <span className="text-xs sm:text-sm text-gray-500">
             Passionate about building full-stack web applications
           </span>
-        </p>
+        </motion.p>
 
-        {/* Social Icons */}
-        <div className="flex justify-center gap-4 mb-8">
-          <a
-            href="https://github.com/dag-ux"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-11 h-11 rounded-full bg-white/5 hover:bg-[#ff0000] flex items-center justify-center transition-all duration-300 hover:scale-110 hover:-translate-y-0.5 border border-white/10 hover:border-[#ff0000] hover:shadow-lg hover:shadow-[#ff0000]/30"
-            aria-label="GitHub"
-          >
-            <FaGithub className="text-gray-300 hover:text-white text-lg" />
-          </a>
-          <a
-            href="https://www.linkedin.com/in/dagimawit-kebede"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-11 h-11 rounded-full bg-white/5 hover:bg-[#ff0000] flex items-center justify-center transition-all duration-300 hover:scale-110 hover:-translate-y-0.5 border border-white/10 hover:border-[#ff0000] hover:shadow-lg hover:shadow-[#ff0000]/30"
-            aria-label="LinkedIn"
-          >
-            <FaLinkedin className="text-gray-300 hover:text-white text-lg" />
-          </a>
-          <a
-            href="mailto:kebededagimawit@gmail.com"
-            className="w-11 h-11 rounded-full bg-white/5 hover:bg-[#ff0000] flex items-center justify-center transition-all duration-300 hover:scale-110 hover:-translate-y-0.5 border border-white/10 hover:border-[#ff0000] hover:shadow-lg hover:shadow-[#ff0000]/30"
-            aria-label="Email"
-          >
-            <FaEnvelope className="text-gray-300 hover:text-white text-lg" />
-          </a>
-        </div>
+        {/* Social icons */}
+        <motion.div variants={item} className="flex justify-center gap-3 sm:gap-4 mb-8 sm:mb-10">
+          {socials.map(({ icon: Icon, href, label }) => (
+            <motion.a
+              key={label}
+              href={href}
+              target={href.startsWith('http') ? '_blank' : undefined}
+              rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+              aria-label={label}
+              whileHover={{ scale: 1.1, y: -3 }}
+              whileTap={{ scale: 0.95 }}
+              className="group relative w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/[0.04] flex items-center justify-center border border-white/10 transition-colors duration-300 hover:bg-[#ff0000] hover:border-[#ff0000] hover:shadow-lg hover:shadow-[#ff0000]/40"
+            >
+              <Icon className="text-gray-300 group-hover:text-white text-base sm:text-lg transition-colors" />
+            </motion.a>
+          ))}
+        </motion.div>
 
         {/* Buttons */}
-        <div className="flex flex-wrap justify-center gap-3">
-          <a
+        <motion.div variants={item} className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 px-4">
+          <motion.a
             href="#projects"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[#ff0000] hover:bg-[#cc0000] text-white font-semibold rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-[#ff0000]/30 hover:-translate-y-0.5 active:scale-95 group"
+            whileHover={{ scale: 1.03, y: -2 }}
+            whileTap={{ scale: 0.97 }}
+            className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 bg-[#ff0000] hover:bg-[#cc0000] text-white font-semibold rounded-lg transition-all duration-300 shadow-lg shadow-[#ff0000]/20 hover:shadow-[#ff0000]/40 group"
           >
             View My Work
             <FaArrowRight className="text-sm transition-transform duration-300 group-hover:translate-x-1" />
-          </a>
-          <a
-            href="/assets/resume.pdf"
-            download
-            className="inline-flex items-center gap-2 px-6 py-3 border-2 border-[#ff0000] hover:bg-[#ff0000] text-white font-semibold rounded-lg transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
+          </motion.a>
+
+          <motion.a
+            href={RESUME_PATH}
+            download="Dagimawit-Kebede-CV.pdf"
+            whileHover={{ scale: 1.03, y: -2 }}
+            whileTap={{ scale: 0.97 }}
+            className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 border-2 border-[#ff0000] hover:bg-[#ff0000] text-white font-semibold rounded-lg transition-all duration-300"
           >
             <FaDownload className="text-sm" />
             Download CV
-          </a>
-        </div>
-      </div>
+          </motion.a>
+        </motion.div>
+      </motion.div>
+
+      {/* Scroll indicator */}
+      <motion.a
+        href="#about"
+        aria-label="Scroll down"
+        className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 text-gray-500 hover:text-[#ff0000] transition-colors"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 2, duration: 0.6 }}
+      >
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+          className="flex flex-col items-center gap-1"
+        >
+          <span className="text-[10px] uppercase tracking-widest hidden sm:block">Scroll</span>
+          <FaChevronDown className="text-sm" />
+        </motion.div>
+      </motion.a>
     </section>
   );
 }
