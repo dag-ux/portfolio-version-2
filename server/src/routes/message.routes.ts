@@ -1,4 +1,4 @@
-﻿import express from 'express';
+import express from 'express';
 import { getMessages, markAsRead, deleteMessage, unreadCount } from '../controllers/message.controller.js';
 import { requireAuth } from '../middleware/auth.js';
 

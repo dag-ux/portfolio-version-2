@@ -1,4 +1,4 @@
-﻿import bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 
 const password = process.argv[2];
 if (!password) {
@@ -7,9 +7,7 @@ if (!password) {
 }
 
 bcrypt.hash(password, 10).then((hash) => {
-  console.log('');
-  console.log('Copy this to ADMIN_PASSWORD_HASH:');
-  console.log('');
+  console.log('\nCopy this to ADMIN_PASSWORD_HASH:\n');
   console.log(hash);
   console.log('');
 });

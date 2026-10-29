@@ -1,32 +1,73 @@
 ﻿import { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getAdminProjects, createProject, updateProject, deleteProject } from '../../services/adminApi';
+import {
+  getAdminProjects,
+  createProject,
+  updateProject,
+  deleteProject,
+} from '../../services/adminApi';
 import ConfirmModal from '../../components/admin/ConfirmModal';
 import Toast from '../../components/admin/Toast';
 import type { ToastType } from '../../components/admin/Toast';
 import ProjectFormModal from '../../components/admin/ProjectFormModal';
-import type { ProjectFormData } from '../../components/admin/ProjectFormModal';
+import type {
+  ProjectFormData,
+  Project,
+} from '../../components/admin/ProjectFormModal';
 import {
-  FaPlus, FaEdit, FaTrash, FaGithub, FaExternalLinkAlt,
-  FaSearch, FaFolder, FaStar, FaFilter,
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaGithub,
+  FaExternalLinkAlt,
+  FaSearch,
+  FaFolder,
+  FaStar,
+  FaFilter,
+  FaImages,
 } from 'react-icons/fa';
-
-interface Project extends ProjectFormData {
-  _id: string;
-  createdAt?: string;
-}
 
 type Filter = 'all' | 'featured' | 'regular';
 
 const container = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.05, delayChildren: 0 } },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05, delayChildren: 0 },
+  },
 };
 
 const item = {
   hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' as const } },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.35, ease: 'easeOut' as const },
+  },
 };
+
+// ✅ Normalize API data so `images` is always a string[]
+function normalizeProject(raw: any): Project {
+  const images: string[] =
+    Array.isArray(raw?.images) && raw.images.length > 0
+      ? raw.images
+      : raw?.image
+      ? [raw.image]
+      : [];
+
+  return {
+    _id: raw._id,
+    title: raw.title || '',
+    description: raw.description || '',
+    image: raw.image || images[0] || '',
+    images,
+    techStack: Array.isArray(raw.techStack) ? raw.techStack : [],
+    liveUrl: raw.liveUrl || '',
+    githubUrl: raw.githubUrl || '',
+    featured: !!raw.featured,
+    createdAt: raw.createdAt,
+  };
+}
 
 export default function ProjectsAdmin() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -38,14 +79,19 @@ export default function ProjectsAdmin() {
   const [editing, setEditing] = useState<Project | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(
+    null
+  );
 
   const loadProjects = async () => {
     setLoading(true);
     setError('');
     try {
       const data = await getAdminProjects();
-      setProjects(Array.isArray(data) ? data : []);
+      const normalized: Project[] = (Array.isArray(data) ? data : []).map(
+        normalizeProject
+      );
+      setProjects(normalized);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to load projects');
     } finally {
@@ -70,11 +116,15 @@ export default function ProjectsAdmin() {
   const handleSave = async (data: ProjectFormData) => {
     if (editing) {
       const updated = await updateProject(editing._id, data);
-      setProjects((prev) => prev.map((p) => (p._id === editing._id ? { ...p, ...updated } : p)));
+      const normalized = normalizeProject({ ...editing, ...updated, ...data });
+      setProjects((prev) =>
+        prev.map((p) => (p._id === editing._id ? normalized : p))
+      );
       setToast({ message: 'Project updated successfully', type: 'success' });
     } else {
       const created = await createProject(data);
-      setProjects((prev) => [created, ...prev]);
+      const normalized = normalizeProject({ ...created, ...data });
+      setProjects((prev) => [normalized, ...prev]);
       setToast({ message: 'Project created successfully', type: 'success' });
     }
     setFormOpen(false);
@@ -127,8 +177,13 @@ export default function ProjectsAdmin() {
   ];
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
-      {/* ===== HEADER ===== */}
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="space-y-6"
+    >
+      {/* HEADER */}
       <motion.div
         variants={item}
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
@@ -161,7 +216,7 @@ export default function ProjectsAdmin() {
         </motion.button>
       </motion.div>
 
-      {/* ===== FILTER TABS ===== */}
+      {/* FILTER TABS */}
       {!loading && !error && projects.length > 0 && (
         <motion.div
           variants={item}
@@ -183,11 +238,17 @@ export default function ProjectsAdmin() {
                   <motion.span
                     layoutId="projectFilterTab"
                     className="absolute inset-0 bg-red-500 rounded-lg shadow-md shadow-red-500/30"
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 400,
+                      damping: 30,
+                    }}
                   />
                 )}
                 <span className="relative z-10 flex items-center gap-1.5">
-                  {tab.key === 'featured' && <FaStar className="text-[10px]" />}
+                  {tab.key === 'featured' && (
+                    <FaStar className="text-[10px]" />
+                  )}
                   {tab.label}
                   <span
                     className={`text-xs px-1.5 py-0.5 rounded-full ${
@@ -205,7 +266,7 @@ export default function ProjectsAdmin() {
         </motion.div>
       )}
 
-      {/* ===== SEARCH ===== */}
+      {/* SEARCH */}
       {!loading && !error && projects.length > 0 && (
         <motion.div variants={item} className="relative">
           <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
@@ -219,7 +280,7 @@ export default function ProjectsAdmin() {
         </motion.div>
       )}
 
-      {/* ===== CONTENT ===== */}
+      {/* CONTENT */}
       {loading ? (
         <SkeletonGrid />
       ) : error ? (
@@ -236,11 +297,7 @@ export default function ProjectsAdmin() {
           </button>
         </motion.div>
       ) : projects.length === 0 ? (
-        <EmptyState
-          search=""
-          onCreate={handleOpenCreate}
-          onClear={() => {}}
-        />
+        <EmptyState search="" onCreate={handleOpenCreate} onClear={() => {}} />
       ) : filtered.length === 0 ? (
         <EmptyState
           search={search}
@@ -269,12 +326,12 @@ export default function ProjectsAdmin() {
           </motion.div>
 
           <p className="text-center text-xs text-slate-400 dark:text-slate-500 pt-4">
-            Showing {filtered.length} of {projects.length} project{projects.length !== 1 ? 's' : ''}
+            Showing {filtered.length} of {projects.length} project
+            {projects.length !== 1 ? 's' : ''}
           </p>
         </>
       )}
 
-      {/* Modals */}
       <ProjectFormModal
         isOpen={formOpen}
         project={editing}
@@ -302,7 +359,11 @@ export default function ProjectsAdmin() {
       />
 
       {toast && (
-        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
     </motion.div>
   );
@@ -318,6 +379,16 @@ function ProjectCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const imageCount = project.images.length > 0
+    ? project.images.length
+    : project.image
+    ? 1
+    : 0;
+
+  const coverImage = project.images.length > 0
+    ? project.images[0]
+    : project.image;
+
   return (
     <motion.div
       layout
@@ -330,9 +401,9 @@ function ProjectCard({
     >
       {/* Image */}
       <div className="relative aspect-video bg-slate-100 dark:bg-slate-900 overflow-hidden">
-        {project.image ? (
+        {coverImage ? (
           <img
-            src={project.image}
+            src={coverImage}
             alt={project.title}
             loading="lazy"
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -346,7 +417,6 @@ function ProjectCard({
           </div>
         )}
 
-        {/* Featured badge */}
         {project.featured && (
           <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-500/95 text-white text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-yellow-500/30">
             <FaStar className="text-[9px]" />
@@ -354,7 +424,13 @@ function ProjectCard({
           </div>
         )}
 
-        {/* Hover actions */}
+        {imageCount > 1 && (
+          <div className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/70 backdrop-blur-md text-white text-[10px] font-medium">
+            <FaImages className="text-[9px]" />
+            {imageCount} images
+          </div>
+        )}
+
         <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200">
           <motion.button
             whileHover={{ scale: 1.1 }}
@@ -386,7 +462,6 @@ function ProjectCard({
           {project.description}
         </p>
 
-        {/* Tech stack */}
         {project.techStack.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-4">
             {project.techStack.slice(0, 5).map((tech) => (
@@ -405,7 +480,6 @@ function ProjectCard({
           </div>
         )}
 
-        {/* Action icons */}
         <div className="flex items-center gap-3 pt-3 border-t border-slate-100 dark:border-slate-700/50">
           {project.githubUrl ? (
             <a

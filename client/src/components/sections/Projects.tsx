@@ -2,16 +2,23 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
-  FaGithub, FaExternalLinkAlt, FaExclamationTriangle,
-  FaFolder, FaStar, FaArrowRight,
+  FaGithub,
+  FaExternalLinkAlt,
+  FaExclamationTriangle,
+  FaFolder,
+  FaStar,
+  FaArrowRight,
+  FaImages,
 } from 'react-icons/fa';
 import { getProjects, API_BASE_URL } from '../../services/api';
+import ImageCarousel from '../ui/ImageCarousel';
 
 interface Project {
   _id: string;
   title: string;
   description: string;
   image: string;
+  images?: string[];
   techStack: string[];
   liveUrl?: string;
   githubUrl?: string;
@@ -21,12 +28,19 @@ interface Project {
 
 const container = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+  },
 };
 
 const cardVariant = {
   hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: 'easeOut' as const },
+  },
 };
 
 export default function Projects() {
@@ -50,21 +64,35 @@ export default function Projects() {
 
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return '';
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://'))
+      return imagePath;
     return `${API_BASE_URL}${imagePath}`;
   };
 
-  // Show only first 6 on home page
+  // ✅ Build the full image list for a project
+  const getProjectImages = (project: Project): string[] => {
+    const list =
+      project.images && project.images.length > 0
+        ? project.images
+        : project.image
+        ? [project.image]
+        : [];
+    return list.map(getImageUrl).filter(Boolean);
+  };
+
   const displayedProjects = projects.slice(0, 6);
   const hasMore = projects.length > 6;
 
   return (
-    <section id="projects" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-black overflow-hidden">
-      {/* Animated glow */}
+    <section
+      id="projects"
+      className="relative py-20 px-4 sm:px-6 lg:px-8 bg-black overflow-hidden"
+    >
       <motion.div
         className="pointer-events-none absolute top-1/3 -right-40 w-[28rem] h-[28rem] rounded-full"
         style={{
-          background: 'radial-gradient(circle, rgba(255,0,0,0.1) 0%, transparent 70%)',
+          background:
+            'radial-gradient(circle, rgba(255,0,0,0.1) 0%, transparent 70%)',
           filter: 'blur(90px)',
         }}
         animate={{ x: [0, -60, 40, 0], y: [0, 40, -30, 0] }}
@@ -72,7 +100,6 @@ export default function Projects() {
       />
 
       <div className="relative container mx-auto max-w-6xl">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -92,7 +119,6 @@ export default function Projects() {
           </p>
         </motion.div>
 
-        {/* Content */}
         {loading ? (
           <LoadingSkeleton />
         ) : error ? (
@@ -109,12 +135,15 @@ export default function Projects() {
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             >
               {displayedProjects.map((project) => (
-                <ProjectCard key={project._id} project={project} imageUrl={getImageUrl(project.image)} />
+                <ProjectCard
+                  key={project._id}
+                  project={project}
+                  images={getProjectImages(project)}
+                />
               ))}
             </motion.div>
 
-            {/* View all CTA */}
-            {(hasMore || projects.length > 0) && (
+            {projects.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -126,7 +155,9 @@ export default function Projects() {
                   to="/projects"
                   className="group inline-flex items-center gap-2 px-6 py-3 border-2 border-[#ff0000] hover:bg-[#ff0000] text-white font-semibold rounded-lg transition-all duration-300 hover:-translate-y-0.5"
                 >
-                  {hasMore ? `View All Projects (${projects.length})` : 'View All Projects'}
+                  {hasMore
+                    ? `View All Projects (${projects.length})`
+                    : 'View All Projects'}
                   <FaArrowRight className="text-sm transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
               </motion.div>
@@ -139,7 +170,13 @@ export default function Projects() {
 }
 
 // ==================== CARD ====================
-function ProjectCard({ project, imageUrl }: { project: Project; imageUrl: string }) {
+function ProjectCard({
+  project,
+  images,
+}: {
+  project: Project;
+  images: string[];
+}) {
   return (
     <motion.div
       variants={cardVariant}
@@ -147,33 +184,36 @@ function ProjectCard({ project, imageUrl }: { project: Project; imageUrl: string
       transition={{ duration: 0.3 }}
       className="group relative bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden hover:border-[#ff0000]/40 transition-all duration-300 shadow-lg shadow-transparent hover:shadow-[#ff0000]/10 flex flex-col"
     >
-      {/* Image */}
+      {/* ✅ Image carousel */}
       <div className="relative aspect-video bg-black/50 overflow-hidden">
-        <img
-          src={imageUrl}
+        <ImageCarousel
+          images={images}
           alt={project.title}
-          loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src =
-              'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"%3E%3Crect fill="%231a1a1a" width="600" height="400"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%23ff0000" font-family="sans-serif" font-size="20"%3ENo Image%3C/text%3E%3C/svg%3E';
-          }}
+          autoPlay
+          interval={3500}
         />
 
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300 pointer-events-none" />
 
         {/* Featured badge */}
         {project.featured && (
-          <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#ff0000] text-white text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-[#ff0000]/50">
+          <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#ff0000] text-white text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-[#ff0000]/50 z-10">
             <FaStar className="text-[9px]" />
             Featured
           </div>
         )}
 
+        {/* ✅ Image count badge */}
+        {images.length > 1 && (
+          <div className="absolute bottom-3 right-3 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-white text-[10px] font-medium z-10">
+            <FaImages className="text-[9px]" />
+            {images.length}
+          </div>
+        )}
+
         {/* Hover action icons */}
-        <div className="absolute top-3 right-3 flex gap-2 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+        <div className="absolute top-3 right-3 flex gap-2 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-10">
           {project.githubUrl && project.githubUrl !== '#' && (
             <a
               href={project.githubUrl}
@@ -209,7 +249,6 @@ function ProjectCard({ project, imageUrl }: { project: Project; imageUrl: string
           {project.description}
         </p>
 
-        {/* Tech stack */}
         {project.techStack.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-4">
             {project.techStack.slice(0, 4).map((tech) => {
@@ -231,7 +270,6 @@ function ProjectCard({ project, imageUrl }: { project: Project; imageUrl: string
           </div>
         )}
 
-        {/* Bottom actions */}
         {(project.liveUrl || project.githubUrl) && (
           <div className="flex items-center gap-3 pt-4 border-t border-white/5">
             {project.liveUrl && project.liveUrl !== '#' && (
@@ -303,7 +341,9 @@ function EmptyState() {
         <FaFolder className="text-3xl text-gray-600" />
       </div>
       <h3 className="text-xl font-semibold text-white mb-2">No projects yet</h3>
-      <p className="text-gray-500 text-sm">Check back soon — I'm always building something new.</p>
+      <p className="text-gray-500 text-sm">
+        Check back soon — I'm always building something new.
+      </p>
     </motion.div>
   );
 }
@@ -320,7 +360,9 @@ function ErrorState({ error }: { error: string }) {
       <div className="w-20 h-20 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto mb-5">
         <FaExclamationTriangle className="text-3xl text-red-500" />
       </div>
-      <h3 className="text-xl font-semibold text-white mb-2">Failed to load projects</h3>
+      <h3 className="text-xl font-semibold text-white mb-2">
+        Failed to load projects
+      </h3>
       <p className="text-gray-500 text-sm mb-6">{error}</p>
       <button
         onClick={() => window.location.reload()}
